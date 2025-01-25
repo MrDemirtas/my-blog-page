@@ -26,9 +26,7 @@ export default function HomePage({ setDetailsPage }) {
 function BlogItem({ id, title, summary, imageUrl, created, setDetailsPage }) {
   return (
     <div className="blog-item" onClick={() => setDetailsPage(id)}>
-      <figure>
-        <img src={imageUrl} />
-      </figure>
+      <img src={imageUrl} />
       <div className="blog-data">
         <div className="blog-data-titles">
           <h3>{title}</h3>

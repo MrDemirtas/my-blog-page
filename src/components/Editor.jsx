@@ -16,7 +16,8 @@ export default function Editor() {
   return (
     <div className="editor-main">
       <NewBlogModal dialogRef={dialogRef} setBlogData={setBlogData} />
-      <button onClick={() => dialogRef.current.showModal()}>+ Yeni Blog Ekle</button>
+      <h1>Editör</h1>
+      <button className="btn green" onClick={() => dialogRef.current.showModal()}>+ Yeni Blog Ekle</button>
       <Blogs blogData={blogData} setBlogData={setBlogData} />
     </div>
   );
@@ -31,21 +32,22 @@ function NewBlogModal({ dialogRef, setBlogData }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formObj),
     }).then((x) => x.json());
-    setBlogData((prev) => [...prev, response]);
+    setBlogData((prev) => [response, ...prev]);
     e.target.reset();
   }
 
   return (
     <dialog ref={dialogRef} className="blog-dialog">
+      <h2>Yeni Blog Oluştur</h2>
       <form method="dialog" onSubmit={handleSubmit} autoComplete="off">
         <input required type="text" name="title" placeholder="Başlık" />
         <input required type="text" name="summary" placeholder="Alt Başlık" />
         <input required type="text" name="imageUrl" placeholder="Resim URL" />
         <textarea required name="body" placeholder="Metin" rows={10}></textarea>
-        <button type="button" onClick={() => dialogRef.current.close()}>
+        <button type="button" className="btn red" onClick={() => dialogRef.current.close()}>
           İptal
         </button>
-        <button type="submit">Blog Ekle</button>
+        <button type="submit" className="btn green">Blog Ekle</button>
       </form>
     </dialog>
   );
@@ -93,8 +95,8 @@ function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
             <p>{summary}</p>
           </div>
           <div className="editor-blog-btns">
-            <button onClick={() => dialogRef.current.showModal()}>🖊️ Düzenle</button>
-            <button onClick={handleRemove}>❌ Sil</button>
+            <button className="btn orange" onClick={() => dialogRef.current.showModal()}>🖊️ Düzenle</button>
+            <button className="btn red" onClick={handleRemove}>🗑️ Sil</button>
           </div>
         </div>
       </div>
@@ -119,14 +121,15 @@ function EditBlogModal({ dialogRef, id, title, summary, imageUrl, setBlogData })
 
   return (
     <dialog ref={dialogRef} className="blog-dialog">
+      <h2>Blog Düzenleme</h2>
       <form method="dialog" onSubmit={handleSubmit} autoComplete="off">
         <input required type="text" name="title" defaultValue={title} placeholder="Başlık" />
         <input required type="text" name="summary" defaultValue={summary} placeholder="Alt Başlık" />
         <input required type="text" name="imageUrl" defaultValue={imageUrl} placeholder="Resim URL" />
-        <button type="button" onClick={() => dialogRef.current.close()}>
+        <button type="button" className="btn red" onClick={() => dialogRef.current.close()}>
           İptal
         </button>
-        <button type="submit">Değişiklikleri Kaydet</button>
+        <button type="submit" className="btn green">Değişiklikleri Kaydet</button>
       </form>
     </dialog>
   );

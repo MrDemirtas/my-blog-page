@@ -28,6 +28,7 @@ header {
 
 .blog-contents {
   max-width: 1440px;
+  margin-inline: auto;
   padding: 16px;
   margin-top: 32px;
   display: grid;
@@ -39,7 +40,7 @@ header {
   background-color: #fff;
   border-radius: 12px;
   display: grid;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: 30% 1fr;
   box-shadow: 0 0 15px #000;
   height: 200px;
 
@@ -66,11 +67,21 @@ header {
 .editor-main {
   margin-top: 24px;
   padding: 16px;
+  max-width: 1440px;
+  margin-inline: auto;
+  h1{
+    border-bottom: 1px solid #000;
+    margin-bottom: 24px;
+  }
 }
 
 .blog-dialog {
   margin: auto;
   width: 80%;
+  max-width: 768px;
+  border-radius: 18px;
+  box-shadow: 0 0 15px #000;
+  
   form {
     display: grid;
     gap: 24px;
@@ -85,6 +96,10 @@ header {
       outline: none;
     }
   }
+
+  h2{
+    margin-bottom: 24px;
+  }
 }
 
 .editor-blogs-contents {
@@ -95,7 +110,7 @@ header {
 
 .editor-blog-item {
   display: grid;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: 30% 1fr;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 0 15px #000;
@@ -130,6 +145,7 @@ header {
   border-radius: 12px;
   box-shadow: 0 0 30px #000;
   min-height: 800px;
+  max-width: 1440px;
   img {
     margin-inline: auto;
     max-height: 300px;
@@ -144,5 +160,43 @@ header {
   h1 {
     border-bottom: 1px solid #000;
     padding-bottom: 12px;
+  }
+}
+
+.btn{
+  border: none;
+  border-radius: 12px;
+  padding: 8px 16px;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.btn.green{
+  background-color: green;
+}
+
+.btn.red{
+  background-color: red;
+}
+
+.btn.orange{
+  background-color: orange;
+}
+
+@media screen and (min-width: 768px) {
+  .blog-contents, .editor-blogs-contents {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  header{
+    padding: 24px 128px;
+  }
+  .blog-contents, .editor-blogs-contents {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
   }
 }
