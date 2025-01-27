@@ -17,19 +17,23 @@ export default function Editor() {
     getData();
     
     if (username.trim() === "" || password.trim() === "") {
-      const promptUsername = prompt("Username");
-      localStorage.username = promptUsername;
-      const promptPassword = prompt("Password");
-      localStorage.password = promptPassword;
-      
-      setUsername(promptUsername);
-      setPassword(promptPassword);
+      getAuthData();
     }
   }, []);
 
+  function getAuthData() {
+    const promptUsername = prompt("Username");
+    localStorage.username = promptUsername;
+    const promptPassword = prompt("Password");
+    localStorage.password = promptPassword;
+    
+    setUsername(promptUsername);
+    setPassword(promptPassword);
+  }
+
   return (
     <div className="editor-main">
-      <Authorization.Provider value={{username, password, setUsername, setPassword}}>
+      <Authorization.Provider value={{username, password, getAuthData}}>
         <NewBlogModal dialogRef={dialogRef} setBlogData={setBlogData} />
         <h1>Editör</h1>
         <button className="btn green" onClick={() => dialogRef.current.showModal()}>+ Yeni Blog Ekle</button>
@@ -40,7 +44,7 @@ export default function Editor() {
 }
 
 function NewBlogModal({ dialogRef, setBlogData }) {
-  const { username, password, setUsername, setPassword } = useContext(Authorization);
+  const { username, password, getAuthData } = useContext(Authorization);
   
   async function handleSubmit(e) {
     const formData = new FormData(e.target);
@@ -59,13 +63,7 @@ function NewBlogModal({ dialogRef, setBlogData }) {
       } else {
         if (x.status === 401) {
           alert("Yetkisiz Erişim!");
-          const promptUsername = prompt("Username");
-          localStorage.username = promptUsername;
-          const promptPassword = prompt("Password");
-          localStorage.password = promptPassword;
-          
-          setUsername(promptUsername);
-          setPassword(promptPassword);
+          getAuthData();
         } else {
           alert("İstek Başarısız!");
         }
@@ -103,7 +101,7 @@ function Blogs({ blogData, setBlogData }) {
 }
 
 function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
-  const { username, password, setUsername, setPassword } = useContext(Authorization);
+  const { username, password, getAuthData } = useContext(Authorization);
   const dialogRef = useRef(null);
 
   async function handleRemove() {
@@ -120,13 +118,7 @@ function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
         } else {
           if (x.status === 401) {
             alert("Yetkisiz Erişim!");
-            const promptUsername = prompt("Username");
-            localStorage.username = promptUsername;
-            const promptPassword = prompt("Password");
-            localStorage.password = promptPassword;
-            
-            setUsername(promptUsername);
-            setPassword(promptPassword);
+            getAuthData();
           } else {
             alert("İstek Başarısız!");
           }
@@ -165,7 +157,7 @@ function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
 }
 
 function EditBlogModal({ dialogRef, id, title, summary, imageUrl, setBlogData }) {
-  const { username, password, setUsername, setPassword } = useContext(Authorization);
+  const { username, password, getAuthData } = useContext(Authorization);
 
   async function handleSubmit(e) {
     const formData = new FormData(e.target);
@@ -187,13 +179,7 @@ function EditBlogModal({ dialogRef, id, title, summary, imageUrl, setBlogData })
       } else {
         if (x.status === 401) {
           alert("Yetkisiz Erişim!");
-          const promptUsername = prompt("Username");
-          localStorage.username = promptUsername;
-          const promptPassword = prompt("Password");
-          localStorage.password = promptPassword;
-          
-          setUsername(promptUsername);
-          setPassword(promptPassword);
+          getAuthData();
         } else {
           alert("İstek Başarısız!");
         }
