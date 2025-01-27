@@ -4,9 +4,11 @@ const Authorization = createContext(null);
 
 export default function Editor() {
   const dialogRef = useRef(null);
+  const authLoginDialogRef = useRef(null);
+  const alertDialogRef = useRef(null);
   const [blogData, setBlogData] = useState([]);
-  const [username, setUsername] = useState(localStorage.username ? localStorage.username : "");
-  const [password, setPassword] = useState(localStorage.password ? localStorage.password : "");
+  const [username, setUsername] = useState(localStorage.username ?? "");
+  const [password, setPassword] = useState(localStorage.password ?? "");
 
   useEffect(() => {
     async function getData() {
@@ -17,25 +19,30 @@ export default function Editor() {
     getData();
     
     if (username.trim() === "" || password.trim() === "") {
-      getAuthData();
+      authLoginDialogRef.current.showModal();
     }
   }, []);
 
-  function getAuthData() {
-    const promptUsername = prompt("Username");
-    localStorage.username = promptUsername;
-    const promptPassword = prompt("Password");
-    localStorage.password = promptPassword;
-    
-    setUsername(promptUsername);
-    setPassword(promptPassword);
+  function updateAuthData(newUsername, newPass) {
+    localStorage.username = newUsername;
+    localStorage.password = newPass;
+    setUsername(newUsername);
+    setPassword(newPass);
   }
 
   return (
     <div className="editor-main">
-      <Authorization.Provider value={{username, password, getAuthData}}>
+      <AlertModal alertDialogRef={alertDialogRef} />
+      <Authorization.Provider value={{username, password, updateAuthData, alertDialogRef}}>
+        <AuthLoginDialog authLoginDialogRef={authLoginDialogRef} />
         <NewBlogModal dialogRef={dialogRef} setBlogData={setBlogData} />
-        <h1>Editör</h1>
+        <div className="editor-header">
+          <h1>Admin Panel</h1>
+          <div className="auth-data">
+            {username && <span>{username}</span>}
+            <button className="btn green" onClick={() => authLoginDialogRef.current.showModal()}>🔑 Kimlik Doğrulama Giriş</button>
+          </div>
+        </div>
         <button className="btn green" onClick={() => dialogRef.current.showModal()}>+ Yeni Blog Ekle</button>
         <Blogs blogData={blogData} setBlogData={setBlogData} />
       </Authorization.Provider>
@@ -43,8 +50,39 @@ export default function Editor() {
   );
 }
 
+function AuthLoginDialog({authLoginDialogRef}) {
+  const { updateAuthData } = useContext(Authorization);
+
+  function handleSubmit(e) {
+    const formData = new FormData(e.target);
+    const formObj = Object.fromEntries(formData);
+    updateAuthData(formObj.username, formObj.password);
+    e.target.reset();
+  }
+  
+  return (
+    <dialog ref={authLoginDialogRef} className="blog-dialog auth">
+      <h2>Kimlik Doğrulama</h2>
+      <form method="dialog" autoComplete="off" onSubmit={handleSubmit}>
+        <label>
+          <span>Kullanıcı Adı</span>
+          <input type="text" name="username" />
+        </label>
+        <label>
+          <span>Şifre</span>
+          <input type="password" name="password" />
+        </label>
+        <div className="btn-group">
+          <button type="button" className="btn red" onClick={() => authLoginDialogRef.current.close()}>İptal</button>
+          <button type="submit" className="btn green">Kaydet</button>
+        </div>
+      </form>
+    </dialog>
+  )
+}
+
 function NewBlogModal({ dialogRef, setBlogData }) {
-  const { username, password, getAuthData } = useContext(Authorization);
+  const { username, password, alertDialogRef } = useContext(Authorization);
   
   async function handleSubmit(e) {
     const formData = new FormData(e.target);
@@ -62,8 +100,7 @@ function NewBlogModal({ dialogRef, setBlogData }) {
         setBlogData((prev) => [response, ...prev]);
       } else {
         if (x.status === 401) {
-          alert("Yetkisiz Erişim!");
-          getAuthData();
+          alertDialogRef.current.showModal();
         } else {
           alert("İstek Başarısız!");
         }
@@ -77,14 +114,28 @@ function NewBlogModal({ dialogRef, setBlogData }) {
     <dialog ref={dialogRef} className="blog-dialog">
       <h2>Yeni Blog Oluştur</h2>
       <form method="dialog" onSubmit={handleSubmit} autoComplete="off">
-        <input required type="text" name="title" placeholder="Başlık" />
-        <input required type="text" name="summary" placeholder="Alt Başlık" />
-        <input required type="text" name="imageUrl" placeholder="Resim URL" />
-        <textarea required name="body" placeholder="Metin" rows={10}></textarea>
-        <button type="button" className="btn red" onClick={() => dialogRef.current.close()}>
-          İptal
-        </button>
-        <button type="submit" className="btn green">Blog Ekle</button>
+        <label>
+          <span>Başlık</span>
+          <input required type="text" name="title" placeholder="Başlık" />
+        </label>
+        <label>
+          <span>Alt Başlık</span>
+          <input required type="text" name="summary" placeholder="Alt Başlık" />
+        </label>
+        <label>
+          <span>Resim URL</span>
+          <input required type="text" name="imageUrl" placeholder="Resim URL" />
+        </label>
+        <label>
+          <span>Metin</span>
+          <textarea required name="body" placeholder="Metin" rows={10}></textarea>
+        </label>
+        <div className="btn-group">
+          <button type="button" className="btn red" onClick={() => dialogRef.current.close()}>
+            İptal
+          </button>
+          <button type="submit" className="btn green">Blog Ekle</button>
+        </div>
       </form>
     </dialog>
   );
@@ -101,31 +152,8 @@ function Blogs({ blogData, setBlogData }) {
 }
 
 function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
-  const { username, password, getAuthData } = useContext(Authorization);
   const dialogRef = useRef(null);
-
-  async function handleRemove() {
-    if (confirm("Emin misin?")) {
-      await fetch(`https://mrdemirtas.pythonanywhere.com/posts/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Basic ${btoa(`${username}:${password}`)}`
-        },
-      }).then(async (x) => {
-        if (x.ok) {
-          setBlogData((prev) => prev.filter((x) => x.id !== id));
-          alert("Blog Silindi!")
-        } else {
-          if (x.status === 401) {
-            alert("Yetkisiz Erişim!");
-            getAuthData();
-          } else {
-            alert("İstek Başarısız!");
-          }
-        }
-      });
-    }
-  }
+  const removeDialogRef = useRef(null);
 
   return (
     <>
@@ -137,6 +165,7 @@ function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
         imageUrl={imageUrl}
         setBlogData={setBlogData}
       />
+      <DeleteModal removeDialogRef={removeDialogRef} id={id} setBlogData={setBlogData} />
       <div className="editor-blog-item">
         <figure>
           <img src={imageUrl} />
@@ -148,7 +177,7 @@ function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
           </div>
           <div className="editor-blog-btns">
             <button className="btn orange" onClick={() => dialogRef.current.showModal()}>🖊️ Düzenle</button>
-            <button className="btn red" onClick={handleRemove}>🗑️ Sil</button>
+            <button className="btn red" onClick={() => removeDialogRef.current.showModal()}>🗑️ Sil</button>
           </div>
         </div>
       </div>
@@ -157,7 +186,7 @@ function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
 }
 
 function EditBlogModal({ dialogRef, id, title, summary, imageUrl, setBlogData }) {
-  const { username, password, getAuthData } = useContext(Authorization);
+  const { username, password, alertDialogRef } = useContext(Authorization);
 
   async function handleSubmit(e) {
     const formData = new FormData(e.target);
@@ -178,8 +207,7 @@ function EditBlogModal({ dialogRef, id, title, summary, imageUrl, setBlogData })
         });
       } else {
         if (x.status === 401) {
-          alert("Yetkisiz Erişim!");
-          getAuthData();
+          alertDialogRef.current.showModal();
         } else {
           alert("İstek Başarısız!");
         }
@@ -191,14 +219,75 @@ function EditBlogModal({ dialogRef, id, title, summary, imageUrl, setBlogData })
     <dialog ref={dialogRef} className="blog-dialog">
       <h2>Blog Düzenleme</h2>
       <form method="dialog" onSubmit={handleSubmit} autoComplete="off">
-        <input required type="text" name="title" defaultValue={title} placeholder="Başlık" />
-        <input required type="text" name="summary" defaultValue={summary} placeholder="Alt Başlık" />
-        <input required type="text" name="imageUrl" defaultValue={imageUrl} placeholder="Resim URL" />
-        <button type="button" className="btn red" onClick={() => dialogRef.current.close()}>
-          İptal
-        </button>
-        <button type="submit" className="btn green">Değişiklikleri Kaydet</button>
+        <label>
+          <span>Başlık</span>
+          <input required type="text" name="title" defaultValue={title} placeholder="Başlık" />
+        </label>
+        <label>
+          <span>Alt Başlık</span>
+          <input required type="text" name="summary" defaultValue={summary} placeholder="Alt Başlık" />
+        </label>
+        <label>
+          <span>Resim URL</span>
+          <input required type="text" name="imageUrl" defaultValue={imageUrl} placeholder="Resim URL" />
+        </label>
+        <div className="btn-group">
+          <button type="button" className="btn red" onClick={() => dialogRef.current.close()}>
+            İptal
+          </button>
+          <button type="submit" className="btn green">Değişiklikleri Kaydet</button>
+        </div>
       </form>
+    </dialog>
+  );
+}
+
+function AlertModal({alertDialogRef}) {
+  return (
+    <dialog ref={alertDialogRef} className="blog-dialog alert">
+      <div className="alert-contents">
+        <span>❌</span>
+        <h3>Yetkisiz Erişim!</h3>
+        <p>Kimlik doğrulama girişi yapınız!</p>
+        <p><button className="btn red" onClick={() => alertDialogRef.current.close()}>Tamam</button></p>
+      </div>
+    </dialog>
+  );
+}
+
+function DeleteModal({ removeDialogRef, id, setBlogData }) {
+  const { username, password, alertDialogRef } = useContext(Authorization);
+
+  async function handleRemove() {
+    await fetch(`https://mrdemirtas.pythonanywhere.com/posts/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Basic ${btoa(`${username}:${password}`)}`
+      },
+    }).then(async (x) => {
+      if (x.ok) {
+        setBlogData((prev) => prev.filter((x) => x.id !== id));
+      } else {
+        if (x.status === 401) {
+          alertDialogRef.current.showModal();
+        } else {
+          alert("İstek Başarısız!");
+        }
+      }
+    });
+    removeDialogRef.current.close();
+  }
+
+  return (
+    <dialog ref={removeDialogRef} className="blog-dialog remove">
+      <div className="alert-contents">
+        <h3>Silmeyi Onayla</h3>
+        <p>Bu işlem geri alınamaz!</p>
+        <div className="btn-group">
+          <button className="btn orange" onClick={() => removeDialogRef.current.close()}>İptal</button>
+          <button className="btn red" onClick={handleRemove}>Onayla</button>
+        </div>
+      </div>
     </dialog>
   );
 }

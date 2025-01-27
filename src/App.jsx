@@ -1,5 +1,6 @@
 import BlogDetails from "./components/BlogDetails";
 import Editor from "./components/Editor";
+import Footer from "./components/Footer";
 import Header from "./components/Header";
 import HomePage from "./components/HomePage";
 import { useState } from "react";
@@ -20,6 +21,7 @@ export default function App() {
             : 
             <HomePage setDetailsPage={setDetailsPage} />
       }
+      <Footer />
     </>
   )
 }

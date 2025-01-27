@@ -14,6 +14,12 @@ export default function HomePage({ setDetailsPage }) {
 
   return (
     <main>
+      <div className="welcome-contents">
+        <h1>Blog Sayfama Hoş Geldiniz!</h1>
+        <p>Ben Furkan Demirtaş. Bu web uygulamasını React ile geliştirdim.</p>
+        <p>Bu web uygulamasında oluşturulan blogları görüntülenebiliyor ve üzerine tıklandığında da blog içeriğine ulaşılabiliyor, admin panel üzerinden ise yeni blog eklenebiliyor, düzenlenebiliyor veya silinebiliyor.</p>
+        <strong>Bu web uygulamasında yetkisiz erişimin önüne geçmek için admin panel sayfasında kimlik doğrulama sistemi var!</strong>
+      </div>
       <div className="blog-contents">
         {blogData.map((item) => (
           <BlogItem key={item.id} {...item} setDetailsPage={setDetailsPage} />
@@ -25,14 +31,15 @@ export default function HomePage({ setDetailsPage }) {
 
 function BlogItem({ id, title, summary, imageUrl, created, setDetailsPage }) {
   return (
-    <div className="blog-item" onClick={() => setDetailsPage(id)}>
+    <div className="blog-item">
       <img src={imageUrl} />
       <div className="blog-data">
+        <em>{created}</em>
         <div className="blog-data-titles">
           <h3>{title}</h3>
           <p>{summary}</p>
         </div>
-        <em>{created} tarihinde oluşturuldu.</em>
+        <button onClick={() => setDetailsPage(id)}>Devamını oku</button>
       </div>
     </div>
   );

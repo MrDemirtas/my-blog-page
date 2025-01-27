@@ -18,6 +18,7 @@ export default function BlogDetails({ id }) {
         <>
         <img src={blogData.imageUrl} />
         <div className="blog-details-body">
+          <em>{blogData.created}</em>
           <h1>{blogData.title}</h1>
           <p>{blogData.body}</p>
         </div>

@@ -1,7 +1,7 @@
 export default function Header({ setEditorPage, setDetailsPage }) {
   return (
     <header>
-      <h2>Furkan Demirtaş Blog</h2>
+      <h2>My Blog</h2>
       <ul>
         <li>
           <a href="#" onClick={() => {setEditorPage(false); setDetailsPage(0)}}>
@@ -10,7 +10,7 @@ export default function Header({ setEditorPage, setDetailsPage }) {
         </li>
         <li>
           <a href="#" onClick={() => {setEditorPage(true); setDetailsPage(0)}}>
-            Editör
+            Admin Panel
           </a>
         </li>
       </ul>
