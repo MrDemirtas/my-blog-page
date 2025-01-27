@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+
+const Authorization = createContext(null);
 
 export default function Editor() {
   const dialogRef = useRef(null);
   const [blogData, setBlogData] = useState([]);
+  const [username, setUsername] = useState(localStorage.username ? localStorage.username : "");
+  const [password, setPassword] = useState(localStorage.password ? localStorage.password : "");
 
   useEffect(() => {
     async function getData() {
@@ -11,28 +15,63 @@ export default function Editor() {
     }
 
     getData();
+    
+    if (username.trim() === "" || password.trim() === "") {
+      const promptUsername = prompt("Username");
+      localStorage.username = promptUsername;
+      const promptPassword = prompt("Password");
+      localStorage.password = promptPassword;
+      
+      setUsername(promptUsername);
+      setPassword(promptPassword);
+    }
   }, []);
 
   return (
     <div className="editor-main">
-      <NewBlogModal dialogRef={dialogRef} setBlogData={setBlogData} />
-      <h1>Editör</h1>
-      <button className="btn green" onClick={() => dialogRef.current.showModal()}>+ Yeni Blog Ekle</button>
-      <Blogs blogData={blogData} setBlogData={setBlogData} />
+      <Authorization.Provider value={{username, password, setUsername, setPassword}}>
+        <NewBlogModal dialogRef={dialogRef} setBlogData={setBlogData} />
+        <h1>Editör</h1>
+        <button className="btn green" onClick={() => dialogRef.current.showModal()}>+ Yeni Blog Ekle</button>
+        <Blogs blogData={blogData} setBlogData={setBlogData} />
+      </Authorization.Provider>
     </div>
   );
 }
 
 function NewBlogModal({ dialogRef, setBlogData }) {
+  const { username, password, setUsername, setPassword } = useContext(Authorization);
+  
   async function handleSubmit(e) {
     const formData = new FormData(e.target);
     const formObj = Object.fromEntries(formData);
-    const response = await fetch("https://mrdemirtas.pythonanywhere.com/posts", {
+    await fetch("https://mrdemirtas.pythonanywhere.com/posts", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${btoa(`${username}:${password}`)}`
+      },
       body: JSON.stringify(formObj),
-    }).then((x) => x.json());
-    setBlogData((prev) => [response, ...prev]);
+    }).then(async (x) => {
+      if (x.ok) {
+        const response = await x.json()
+        setBlogData((prev) => [response, ...prev]);
+      } else {
+        if (x.status === 401) {
+          alert("Yetkisiz Erişim!");
+          const promptUsername = prompt("Username");
+          localStorage.username = promptUsername;
+          const promptPassword = prompt("Password");
+          localStorage.password = promptPassword;
+          
+          setUsername(promptUsername);
+          setPassword(promptPassword);
+        } else {
+          alert("İstek Başarısız!");
+        }
+      }
+    });
+
     e.target.reset();
   }
 
@@ -64,14 +103,35 @@ function Blogs({ blogData, setBlogData }) {
 }
 
 function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
+  const { username, password, setUsername, setPassword } = useContext(Authorization);
   const dialogRef = useRef(null);
 
   async function handleRemove() {
     if (confirm("Emin misin?")) {
-      const response = await fetch(`https://mrdemirtas.pythonanywhere.com/posts/${id}`, {
+      await fetch(`https://mrdemirtas.pythonanywhere.com/posts/${id}`, {
         method: "DELETE",
-      }).then((x) => x.json());
-      setBlogData((prev) => prev.filter((x) => x.id !== id));
+        headers: {
+          "Authorization": `Basic ${btoa(`${username}:${password}`)}`
+        },
+      }).then(async (x) => {
+        if (x.ok) {
+          setBlogData((prev) => prev.filter((x) => x.id !== id));
+          alert("Blog Silindi!")
+        } else {
+          if (x.status === 401) {
+            alert("Yetkisiz Erişim!");
+            const promptUsername = prompt("Username");
+            localStorage.username = promptUsername;
+            const promptPassword = prompt("Password");
+            localStorage.password = promptPassword;
+            
+            setUsername(promptUsername);
+            setPassword(promptPassword);
+          } else {
+            alert("İstek Başarısız!");
+          }
+        }
+      });
     }
   }
 
@@ -105,17 +165,39 @@ function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
 }
 
 function EditBlogModal({ dialogRef, id, title, summary, imageUrl, setBlogData }) {
+  const { username, password, setUsername, setPassword } = useContext(Authorization);
+
   async function handleSubmit(e) {
     const formData = new FormData(e.target);
     const formObj = Object.fromEntries(formData);
-    const response = await fetch(`https://mrdemirtas.pythonanywhere.com/posts/${id}`, {
+    await fetch(`https://mrdemirtas.pythonanywhere.com/posts/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${btoa(`${username}:${password}`)}`
+      },
       body: JSON.stringify(formObj),
-    }).then((x) => x.json());
-    setBlogData((prev) => {
-      prev[prev.findIndex((x) => x.id === id)] = response;
-      return [...prev];
+    }).then(async (x) => {
+      if (x.ok) {
+        const response = await x.json()
+        setBlogData((prev) => {
+          prev[prev.findIndex((x) => x.id === id)] = response;
+          return [...prev];
+        });
+      } else {
+        if (x.status === 401) {
+          alert("Yetkisiz Erişim!");
+          const promptUsername = prompt("Username");
+          localStorage.username = promptUsername;
+          const promptPassword = prompt("Password");
+          localStorage.password = promptPassword;
+          
+          setUsername(promptUsername);
+          setPassword(promptPassword);
+        } else {
+          alert("İstek Başarısız!");
+        }
+      }
     });
   }
 
