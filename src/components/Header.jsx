@@ -4,7 +4,7 @@ export default function Header() {
       <h2>My Blog</h2>
       <ul>
         <li>
-          <a href="#/home">
+          <a href="#/">
             Ana Sayfa
           </a>
         </li>
