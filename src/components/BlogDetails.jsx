@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { marked } from "marked";
+
 export default function BlogDetails({ id }) {
   const [blogData, setBlogData] = useState(null);
 
@@ -16,12 +18,12 @@ export default function BlogDetails({ id }) {
     <div className="blog-details">
       {blogData !== null && (
         <>
-        <img src={blogData.imageUrl} />
-        <div className="blog-details-body">
-          <em>{blogData.created}</em>
-          <h1>{blogData.title}</h1>
-          <p>{blogData.body}</p>
-        </div>
+          <img src={blogData.imageUrl} />
+          <div className="blog-details-body">
+            <em>{blogData.created}</em>
+            <h1>{blogData.title}</h1>
+            <p dangerouslySetInnerHTML={{ __html: marked.parse(blogData.body)}} />
+          </div>
         </>
       )}
     </div>
