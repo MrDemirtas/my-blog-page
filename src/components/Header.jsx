@@ -1,15 +1,15 @@
-export default function Header({ setEditorPage, setDetailsPage }) {
+export default function Header() {
   return (
     <header>
       <h2>My Blog</h2>
       <ul>
         <li>
-          <a href="#" onClick={() => {setEditorPage(false); setDetailsPage(0)}}>
+          <a href="#/home">
             Ana Sayfa
           </a>
         </li>
         <li>
-          <a href="#" onClick={() => {setEditorPage(true); setDetailsPage(0)}}>
+          <a href="#/admin">
             Admin Panel
           </a>
         </li>

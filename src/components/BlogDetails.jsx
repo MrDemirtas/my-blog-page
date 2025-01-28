@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 
 import { marked } from "marked";
 
-export default function BlogDetails({ id }) {
+export default function BlogDetails() {
+  const id = location.hash.split("/").at(-1);
   const [blogData, setBlogData] = useState(null);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function HomePage({ setDetailsPage }) {
+export default function HomePage() {
   const [blogData, setBlogData] = useState([]);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function HomePage({ setDetailsPage }) {
       </div>
       <div className="blog-contents">
         {blogData.map((item) => (
-          <BlogItem key={item.id} {...item} setDetailsPage={setDetailsPage} />
+          <BlogItem key={item.id} {...item} />
         ))}
       </div>
     </main>
@@ -39,7 +39,7 @@ function BlogItem({ id, title, summary, imageUrl, created, setDetailsPage }) {
           <h3>{title}</h3>
           <p>{summary}</p>
         </div>
-        <button onClick={() => setDetailsPage(id)}>Şiiri oku</button>
+        <button onClick={() => location.href = `#/blog-detail/${id}`}>Şiiri oku</button>
       </div>
     </div>
   );

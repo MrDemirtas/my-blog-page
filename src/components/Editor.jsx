@@ -187,6 +187,17 @@ function BlogItem({ id, title, summary, imageUrl, setBlogData }) {
 
 function EditBlogModal({ dialogRef, id, title, summary, imageUrl, setBlogData }) {
   const { username, password, alertDialogRef } = useContext(Authorization);
+  const blogBodyRef = useRef(null);
+    
+  useEffect(() => {
+    fetch(`https://mrdemirtas.pythonanywhere.com/posts/${id}`)
+      .then(async (res) => {
+        if (res.ok) {
+          const response = await res.json();
+          blogBodyRef.current.value = response.body;
+        }
+      })
+  }, []);
 
   async function handleSubmit(e) {
     const formData = new FormData(e.target);
@@ -230,6 +241,10 @@ function EditBlogModal({ dialogRef, id, title, summary, imageUrl, setBlogData })
         <label>
           <span>Resim URL</span>
           <input required type="text" name="imageUrl" defaultValue={imageUrl} placeholder="Resim URL" />
+        </label>
+        <label>
+          <span>Metin</span>
+          <textarea ref={blogBodyRef} required name="body" placeholder="Metin" rows={10}></textarea>
         </label>
         <div className="btn-group">
           <button type="button" className="btn red" onClick={() => dialogRef.current.close()}>
