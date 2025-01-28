@@ -236,6 +236,12 @@ footer {
   min-height: 250px;
 }
 
+.editor-blog-titles{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .editor-blog-btns {
   display: flex;
   justify-content: space-between;

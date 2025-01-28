@@ -39,7 +39,7 @@ function BlogItem({ id, title, summary, imageUrl, created, setDetailsPage }) {
           <h3>{title}</h3>
           <p>{summary}</p>
         </div>
-        <button onClick={() => setDetailsPage(id)}>Devamını oku</button>
+        <button onClick={() => setDetailsPage(id)}>Şiiri oku</button>
       </div>
     </div>
   );
