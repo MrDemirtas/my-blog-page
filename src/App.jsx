@@ -9,6 +9,7 @@ export default function App() {
   
   useEffect(() => {
     window.addEventListener("hashchange", () => setRoute(location.hash.substring(1)));
+    location.href = "#/";
   }, []);
 
   return (
